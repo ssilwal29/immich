@@ -150,6 +150,8 @@ jobs:
       dockerhub-push: ${{ github.event_name == 'release' }}
       build-args: |
         DEVICE=${{ matrix.device }}
+        BUILD_REPOSITORY=${{ github.repository }}
+        BUILD_REPOSITORY_URL=${{ github.server_url }}/${{ github.repository }}
 
   server:
     name: Build and Push Server
@@ -170,6 +172,8 @@ jobs:
       dockerhub-push: ${{ github.event_name == 'release' }}
       build-args: |
         DEVICE=cpu
+        BUILD_REPOSITORY=${{ github.repository }}
+        BUILD_REPOSITORY_URL=${{ github.server_url }}/${{ github.repository }}
 
   success-check-server:
     name: Docker Build & Push Server Success
