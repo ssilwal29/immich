@@ -145,7 +145,7 @@ RUN apt-get update && \
     apt-get autoremove -yqq && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-
+    
 RUN ln -s "/usr/lib/$(arch)-linux-gnu/libmimalloc.so.2" /usr/lib/libmimalloc.so.2
 
 WORKDIR /usr/src

@@ -1,12 +1,15 @@
-import { Kysely } from 'kysely';
+import { Kysely, sql } from 'kysely';
 
 export async function up(db: Kysely<any>): Promise<void> {
-  await db.schema
-    .alterTable('shared_link')
-    .addColumn('allowSubscribe', 'boolean', (col) => col.notNull().defaultTo(false))
-    .execute();
+  await sql`
+    ALTER TABLE "shared_link"
+      ADD COLUMN "allowSubscribe" boolean NOT NULL DEFAULT false;
+  `.execute(db);
 }
 
 export async function down(db: Kysely<any>): Promise<void> {
-  await db.schema.alterTable('shared_link').dropColumn('allowSubscribe').execute();
+  await sql`
+    ALTER TABLE "shared_link"
+      DROP COLUMN IF EXISTS "allowSubscribe";
+  `.execute(db);
 }
