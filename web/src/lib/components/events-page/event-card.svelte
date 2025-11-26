@@ -36,7 +36,7 @@
   onclick={handleClick}
 >
   <!-- Image Container -->
-  <div class="relative w-full aspect-[3/2] overflow-hidden bg-gray-100 dark:bg-gray-900">
+  <div class="relative w-full aspect-[3/2] sm:aspect-[3/2] overflow-hidden bg-gray-100 dark:bg-gray-900">
     {#if thumbnailUrl}
       <img
         src={thumbnailUrl}
@@ -130,7 +130,7 @@
               d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"
             />
           </svg> -->
-          <span class="font-semibold truncate max-w-[120px] text-black-600 dark:text-black-600">{event.owner.name}</span
+          <span class="font-semibold truncate max-w-[120px] sm:max-w-[80px] text-black-600 dark:text-black-600">{event.owner.name}</span
           >
         </div>
       </div>

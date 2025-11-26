@@ -9,8 +9,9 @@
   let { events }: Props = $props();
 </script>
 
-<div class="grid w-full gap-4 grid-cols-[repeat(auto-fill,minmax(240px,1fr))]">
-  {#each events as event (event.id)}
+<!-- In your events list page (e.g., +page.svelte) -->
+<div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6 p-4">
+  {#each events as event}
     <EventCard {event} />
   {/each}
 </div>

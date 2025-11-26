@@ -37,7 +37,7 @@
   };
 </script>
 
-<UserPageLayout class="pl-4" title={$t('events')} description={$t('events_description')}>
+<UserPageLayout class="pl-2 sm:pl-2 pl-4" title={$t('events')} description={$t('events_description')}>
   {#snippet buttons()}
     <EventControls {eventGroupNames} bind:searchQuery />
     <Button
@@ -52,7 +52,8 @@
     </Button>
   {/snippet}
 
-  <section class="px-4 sm:px-6 md:px-8 pt-20 md:pt-24 pb-10 max-w-6xl mx-auto w-full">
+  <section class="px-4 sm:px-6 md:px-8 pt-10 md:pt-10 pb-10 max-w-6xl mx-auto w-full">
+    <h1 class="pb-5">All your Events</h1>
     {#if events.length === 0}
       <div class="flex justify-center">
         <EmptyPlaceholder

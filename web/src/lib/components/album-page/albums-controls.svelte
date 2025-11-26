@@ -151,7 +151,7 @@
   <Button
     leadingIcon={mdiPlusBoxOutline}
     onclick={() => createAlbumAndRedirect(undefined, undefined, eventId, eventName)}
-    size="small"
+    size="medium"
     variant="ghost"
     color="secondary"
   >

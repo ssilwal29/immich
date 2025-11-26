@@ -49,7 +49,7 @@
   {/snippet}
 
   <div class="flex items-left pb-4 pt-4 mb-2">
-    <Button leadingIcon={mdiArrowLeft} size="small" color="secondary" href={AppRoute.EVENTS}>
+    <Button leadingIcon={mdiArrowLeft} size="medium" color="secondary" href={AppRoute.EVENTS}>
       <span class="sm:inline">{$t('all_events')}</span>
     </Button>
   </div>
