@@ -39,16 +39,22 @@ export class AlbumService extends BaseService {
     };
   }
 
-  async getAll({ user: { id: ownerId } }: AuthDto, { assetId, shared }: GetAlbumsDto): Promise<AlbumResponseDto[]> {
+  async getAll(
+    { user: { id: ownerId } }: AuthDto,
+    { assetId, shared, eventId }: GetAlbumsDto,
+  ): Promise<AlbumResponseDto[]> {
     await this.albumRepository.updateThumbnails();
 
     let albums: MapAlbumDto[];
     if (assetId) {
       albums = await this.albumRepository.getByAssetId(ownerId, assetId);
     } else if (shared === true) {
-      albums = await this.albumRepository.getShared(ownerId);
+      albums = await this.albumRepository.getShared(ownerId, eventId);
     } else if (shared === false) {
       albums = await this.albumRepository.getNotShared(ownerId);
+    } else if (eventId) {
+      // When eventId is specified without shared flag, get all accessible albums for that event
+      albums = await this.albumRepository.getAccessibleForEvent(ownerId, eventId);
     } else {
       albums = await this.albumRepository.getOwned(ownerId);
     }
@@ -116,12 +122,17 @@ export class AlbumService extends BaseService {
 
     const userMetadata = await this.userRepository.getMetadata(auth.user.id);
 
+    if (!dto.eventId) {
+      throw new BadRequestException('Event ID is required');
+    }
+
     const album = await this.albumRepository.create(
       {
         ownerId: auth.user.id,
         albumName: dto.albumName,
         description: dto.description,
         albumThumbnailAssetId: assetIds[0] || null,
+        eventId: dto.eventId,
         order: getPreferences(userMetadata).albums.defaultAssetOrder,
       },
       assetIds,
@@ -151,6 +162,7 @@ export class AlbumService extends BaseService {
       albumName: dto.albumName,
       description: dto.description,
       albumThumbnailAssetId: dto.albumThumbnailAssetId,
+      eventId: dto.eventId ?? album.eventId,
       isActivityEnabled: dto.isActivityEnabled,
       order: dto.order,
     });

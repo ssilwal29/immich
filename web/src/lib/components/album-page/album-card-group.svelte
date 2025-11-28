@@ -1,9 +1,13 @@
 <script lang="ts">
   import { resolve } from '$app/paths';
   import AlbumCard from '$lib/components/album-page/album-card.svelte';
-  import { AppRoute } from '$lib/constants';
   import { albumViewSettings } from '$lib/stores/preferences.store';
-  import { type AlbumGroup, isAlbumGroupCollapsed, toggleAlbumGroupCollapsing } from '$lib/utils/album-utils';
+  import {
+    buildAlbumRoute,
+    isAlbumGroupCollapsed,
+    toggleAlbumGroupCollapsing,
+    type AlbumGroup,
+  } from '$lib/utils/album-utils';
   import type { ContextMenuPosition } from '$lib/utils/context-menu';
   import type { AlbumResponseDto } from '@immich/sdk';
   import { Icon } from '@immich/ui';
@@ -62,11 +66,11 @@
 
 <div class="mt-4">
   {#if !isCollapsed}
-    <div class="grid grid-auto-fill-56 gap-y-4" transition:slide={{ duration: 300 }}>
+    <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-4" transition:slide={{ duration: 300 }}>
       {#each albums as album, index (album.id)}
         <a
           data-sveltekit-preload-data="hover"
-          href={resolve(`${AppRoute.ALBUMS}/${album.id}`)}
+          href={resolve(buildAlbumRoute(album.id, album.eventId))}
           animate:flip={{ duration: 400 }}
           oncontextmenu={(event) => oncontextmenu(event, album)}
         >

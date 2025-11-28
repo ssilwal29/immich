@@ -388,6 +388,7 @@ export type AlbumResponseDto = {
     createdAt: string;
     description: string;
     endDate?: string;
+    eventId: string | null;
     hasSharedLink: boolean;
     id: string;
     isActivityEnabled: boolean;
@@ -408,6 +409,7 @@ export type CreateAlbumDto = {
     albumUsers?: AlbumUserCreateDto[];
     assetIds?: string[];
     description?: string;
+    eventId: string;
 };
 export type AlbumsAddAssetsDto = {
     albumIds: string[];
@@ -426,6 +428,7 @@ export type UpdateAlbumDto = {
     albumName?: string;
     albumThumbnailAssetId?: string;
     description?: string;
+    eventId?: string;
     isActivityEnabled?: boolean;
     order?: AssetOrder;
 };
@@ -670,6 +673,31 @@ export type DownloadResponseDto = {
 export type DuplicateResponseDto = {
     assets: AssetResponseDto[];
     duplicateId: string;
+};
+export type EventResponseDto = {
+    albumCount: number;
+    createdAt: string;
+    description: string;
+    eventName: string;
+    eventThumbnailAssetId: string | null;
+    id: string;
+    isOwner?: boolean;
+    owner: UserResponseDto;
+    ownerId: string;
+    updatedAt: string;
+};
+export type CreateEventDto = {
+    description?: string;
+    eventName: string;
+    eventThumbnailAssetId?: string;
+};
+export type EventStatisticsResponseDto = {
+    owned: number;
+};
+export type UpdateEventDto = {
+    description?: string;
+    eventName?: string;
+    eventThumbnailAssetId?: string;
 };
 export type PersonResponseDto = {
     birthDate: string | null;
@@ -1303,6 +1331,7 @@ export type SessionUpdateDto = {
 export type SharedLinkResponseDto = {
     album?: AlbumResponseDto;
     allowDownload: boolean;
+    allowSubscribe: boolean;
     allowUpload: boolean;
     assets: AssetResponseDto[];
     createdAt: string;
@@ -1320,6 +1349,7 @@ export type SharedLinkResponseDto = {
 export type SharedLinkCreateDto = {
     albumId?: string;
     allowDownload?: boolean;
+    allowSubscribe?: boolean;
     allowUpload?: boolean;
     assetIds?: string[];
     description?: string | null;
@@ -1329,8 +1359,15 @@ export type SharedLinkCreateDto = {
     slug?: string | null;
     "type": SharedLinkType;
 };
+export type SharedLinkSubscribeDto = {
+    email?: string;
+    name?: string;
+    password?: string;
+    subscriberUserId?: string;
+};
 export type SharedLinkEditDto = {
     allowDownload?: boolean;
+    allowSubscribe?: boolean;
     allowUpload?: boolean;
     /** Few clients cannot send null to set the expiryTime to never.
     Setting this flag and not sending expiryAt is considered as null instead.
@@ -2061,8 +2098,9 @@ export function getUserStatisticsAdmin({ id, isFavorite, isTrashed, visibility }
 /**
  * List all albums
  */
-export function getAllAlbums({ assetId, shared }: {
+export function getAllAlbums({ assetId, eventId, shared }: {
     assetId?: string;
+    eventId?: string;
     shared?: boolean;
 }, opts?: Oazapfts.RequestOpts) {
     return oazapfts.ok(oazapfts.fetchJson<{
@@ -2070,6 +2108,7 @@ export function getAllAlbums({ assetId, shared }: {
         data: AlbumResponseDto[];
     }>(`/albums${QS.query(QS.explode({
         assetId,
+        eventId,
         shared
     }))}`, {
         ...opts
@@ -2767,6 +2806,21 @@ export function unlockAuthSession({ sessionUnlockDto }: {
     })));
 }
 /**
+ * Register user
+ */
+export function signUp({ signUpDto }: {
+    signUpDto: SignUpDto;
+}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.ok(oazapfts.fetchJson<{
+        status: 201;
+        data: UserAdminResponseDto;
+    }>("/auth/sign-up", oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: signUpDto
+    })));
+}
+/**
  * Retrieve auth status
  */
 export function getAuthStatus(opts?: Oazapfts.RequestOpts) {
@@ -2862,6 +2916,83 @@ export function deleteDuplicate({ id }: {
         ...opts,
         method: "DELETE"
     }));
+}
+/**
+ * List all events
+ */
+export function getAllEvents(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.ok(oazapfts.fetchJson<{
+        status: 200;
+        data: EventResponseDto[];
+    }>("/events", {
+        ...opts
+    }));
+}
+/**
+ * Create an event
+ */
+export function createEvent({ createEventDto }: {
+    createEventDto: CreateEventDto;
+}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.ok(oazapfts.fetchJson<{
+        status: 201;
+        data: EventResponseDto;
+    }>("/events", oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: createEventDto
+    })));
+}
+/**
+ * Retrieve event statistics
+ */
+export function getEventStatistics(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.ok(oazapfts.fetchJson<{
+        status: 200;
+        data: EventStatisticsResponseDto;
+    }>("/events/statistics", {
+        ...opts
+    }));
+}
+/**
+ * Delete an event
+ */
+export function deleteEvent({ id }: {
+    id: string;
+}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.ok(oazapfts.fetchText(`/events/${encodeURIComponent(id)}`, {
+        ...opts,
+        method: "DELETE"
+    }));
+}
+/**
+ * Retrieve an event
+ */
+export function getEventInfo({ id }: {
+    id: string;
+}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.ok(oazapfts.fetchJson<{
+        status: 200;
+        data: EventResponseDto;
+    }>(`/events/${encodeURIComponent(id)}`, {
+        ...opts
+    }));
+}
+/**
+ * Update an event
+ */
+export function updateEventInfo({ id, updateEventDto }: {
+    id: string;
+    updateEventDto: UpdateEventDto;
+}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.ok(oazapfts.fetchJson<{
+        status: 200;
+        data: EventResponseDto;
+    }>(`/events/${encodeURIComponent(id)}`, oazapfts.json({
+        ...opts,
+        method: "PATCH",
+        body: updateEventDto
+    })));
 }
 /**
  * Retrieve faces for asset
@@ -4164,6 +4295,26 @@ export function getMySharedLink({ key, password, slug, token }: {
     }));
 }
 /**
+ * Subscribe to a shared link
+ */
+export function subscribeToSharedLink({ key, slug, sharedLinkSubscribeDto }: {
+    key?: string;
+    slug?: string;
+    sharedLinkSubscribeDto: SharedLinkSubscribeDto;
+}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.ok(oazapfts.fetchJson<{
+        status: 201;
+        data: UserAdminResponseDto;
+    }>(`/shared-links/subscribe${QS.query(QS.explode({
+        key,
+        slug
+    }))}`, oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: sharedLinkSubscribeDto
+    })));
+}
+/**
  * Delete a shared link
  */
 export function removeSharedLink({ id }: {
@@ -5144,6 +5295,11 @@ export enum Permission {
     AlbumUserCreate = "albumUser.create",
     AlbumUserUpdate = "albumUser.update",
     AlbumUserDelete = "albumUser.delete",
+    EventCreate = "event.create",
+    EventRead = "event.read",
+    EventUpdate = "event.update",
+    EventDelete = "event.delete",
+    EventStatistics = "event.statistics",
     AuthChangePassword = "auth.changePassword",
     AuthDeviceDelete = "authDevice.delete",
     ArchiveRead = "archive.read",

@@ -34,7 +34,7 @@
 </script>
 
 <div
-  class="group relative rounded-2xl border border-transparent p-5 hover:bg-gray-100 hover:border-gray-200 dark:hover:border-gray-800 dark:hover:bg-gray-900"
+  class="group relative rounded-2xl border border-transparent p-5 hover:bg-gray-100 hover:border-gray-200 dark:hover:border-gray-800 dark:hover:bg-gray-900 max-w-xs"
   data-testid="album-card"
 >
   {#if onShowContextMenu}

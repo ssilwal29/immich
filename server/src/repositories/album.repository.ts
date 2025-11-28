@@ -140,25 +140,29 @@ export class AlbumRepository {
   }
 
   @GenerateSql({ params: [DummyValue.UUID] })
-  async getOwned(ownerId: string) {
-    return this.db
+  async getOwned(ownerId: string, eventId?: string) {
+    let query = this.db
       .selectFrom('album')
       .selectAll('album')
       .select(withOwner)
       .select(withAlbumUsers)
       .select(withSharedLink)
       .where('album.ownerId', '=', ownerId)
-      .where('album.deletedAt', 'is', null)
-      .orderBy('album.createdAt', 'desc')
-      .execute();
+      .where('album.deletedAt', 'is', null);
+
+    if (eventId) {
+      query = query.where('album.eventId', '=', eventId);
+    }
+
+    return query.orderBy('album.createdAt', 'desc').execute();
   }
 
   /**
    * Get albums shared with and shared by owner.
    */
   @GenerateSql({ params: [DummyValue.UUID] })
-  async getShared(ownerId: string) {
-    return this.db
+  async getShared(ownerId: string, eventId?: string) {
+    let query = this.db
       .selectFrom('album')
       .selectAll('album')
       .where((eb) =>
@@ -177,7 +181,43 @@ export class AlbumRepository {
           ),
         ]),
       )
+      .where('album.deletedAt', 'is', null);
+
+    if (eventId) {
+      query = query.where('album.eventId', '=', eventId);
+    }
+
+    return query
+      .select(withAlbumUsers)
+      .select(withOwner)
+      .select(withSharedLink)
+      .orderBy('album.createdAt', 'desc')
+      .execute();
+  }
+
+  /**
+   * Get all albums accessible to user for an event (owned or shared with user)
+   */
+  @GenerateSql({ params: [DummyValue.UUID, DummyValue.UUID] })
+  async getAccessibleForEvent(userId: string, eventId: string) {
+    return this.db
+      .selectFrom('album')
+      .selectAll('album')
+      .where('album.eventId', '=', eventId)
       .where('album.deletedAt', 'is', null)
+      .where((eb) =>
+        eb.or([
+          // User owns the album
+          eb('album.ownerId', '=', userId),
+          // User has access via album_user
+          eb.exists(
+            eb
+              .selectFrom('album_user')
+              .whereRef('album_user.albumId', '=', 'album.id')
+              .where('album_user.userId', '=', userId),
+          ),
+        ]),
+      )
       .select(withAlbumUsers)
       .select(withOwner)
       .select(withSharedLink)

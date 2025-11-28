@@ -132,9 +132,9 @@
   <div class="flex gap-2 overflow-x-auto dark" data-testid="asset-viewer-navbar-actions">
     <CastButton />
 
-    {#if !asset.isTrashed && $user && !isLocked}
+    <!-- {#if !asset.isTrashed && $user && !isLocked}
       <ShareAction {asset} />
-    {/if}
+    {/if} -->
     {#if asset.isOffline}
       <IconButton
         shape="round"
@@ -192,14 +192,14 @@
           <DownloadAction asset={toTimelineAsset(asset)} menuItem />
         {/if}
 
-        {#if !isLocked}
+        <!-- {#if !isLocked}
           {#if asset.isTrashed}
             <RestoreAction {asset} {onAction} />
           {:else}
             <AddToAlbumAction {asset} {onAction} />
             <AddToAlbumAction {asset} {onAction} shared />
           {/if}
-        {/if}
+        {/if} -->
 
         {#if isOwner}
           <AddToStackAction {asset} {stack} {onAction} />
@@ -216,14 +216,14 @@
           {#if album}
             <SetAlbumCoverAction {asset} {album} />
           {/if}
-          {#if person}
+          <!-- {#if person}
             <SetFeaturedPhotoAction {asset} {person} {onAction} />
-          {/if}
+          {/if} -->
           {#if asset.type === AssetTypeEnum.Image && !isLocked}
             <SetProfilePictureAction {asset} />
           {/if}
 
-          {#if !isLocked}
+          <!-- {#if !isLocked}
             <ArchiveAction {asset} {onAction} {preAction} />
             <MenuOption
               icon={mdiUpload}
@@ -245,9 +245,9 @@
                 text={$t('view_similar_photos')}
               />
             {/if}
-          {/if}
+          {/if} -->
 
-          {#if !asset.isTrashed}
+          <!-- {#if !asset.isTrashed}
             <SetVisibilityAction asset={toTimelineAsset(asset)} {onAction} {preAction} />
           {/if}
 
@@ -257,9 +257,9 @@
               onClick={() => setPlayOriginalVideo(!playOriginalVideo)}
               text={playOriginalVideo ? $t('play_transcoded_video') : $t('play_original_video')}
             />
-          {/if}
+          {/if} -->
 
-          <hr />
+          <!-- <hr />
           <MenuOption
             icon={mdiHeadSyncOutline}
             onClick={() => onRunJob(AssetJobName.RefreshFaces)}
@@ -281,7 +281,7 @@
               onClick={() => onRunJob(AssetJobName.TranscodeVideo)}
               text={$getAssetJobName(AssetJobName.TranscodeVideo)}
             />
-          {/if}
+          {/if} -->
         {/if}
       </ButtonContextMenu>
     {/if}
