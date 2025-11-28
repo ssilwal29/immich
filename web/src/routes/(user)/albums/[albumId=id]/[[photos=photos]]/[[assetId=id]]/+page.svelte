@@ -557,12 +557,12 @@
         assets={assetInteraction.selectedAssets}
         clearSelect={() => assetInteraction.clearMultiselect()}
       >
-        <CreateSharedLink />
+        <!-- <CreateSharedLink /> -->
         <SelectAllAssets {timelineManager} {assetInteraction} />
-        <ButtonContextMenu icon={mdiPlus} title={$t('add_to')}>
+        <!-- <ButtonContextMenu icon={mdiPlus} title={$t('add_to')}>
           <AddToAlbum />
           <AddToAlbum shared />
-        </ButtonContextMenu>
+        </ButtonContextMenu> -->
         {#if assetInteraction.isAllUserOwned}
           <FavoriteAction
             removeFavorite={assetInteraction.isAllFavorite}
@@ -586,17 +586,17 @@
                 onClick={() => updateThumbnailUsingCurrentSelection()}
               />
             {/if}
-            <ArchiveAction menuItem unarchive={assetInteraction.isAllArchived} />
-            <SetVisibilityAction menuItem onVisibilitySet={handleSetVisibility} />
+            <!-- <ArchiveAction menuItem unarchive={assetInteraction.isAllArchived} /> -->
+            <!-- <SetVisibilityAction menuItem onVisibilitySet={handleSetVisibility} /> -->
           {/if}
 
           {#if $preferences.tags.enabled && assetInteraction.isAllUserOwned}
             <TagAction menuItem />
           {/if}
 
-          {#if isOwned || assetInteraction.isAllUserOwned}
+          <!-- {#if isOwned || assetInteraction.isAllUserOwned}
             <RemoveFromAlbum menuItem bind:album onRemove={handleRemoveAssets} />
-          {/if}
+          {/if} -->
           {#if assetInteraction.isAllUserOwned}
             <DeleteAssets menuItem onAssetDelete={handleRemoveAssets} onUndoDelete={handleUndoRemoveAssets} />
           {/if}

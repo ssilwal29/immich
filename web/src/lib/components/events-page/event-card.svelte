@@ -30,113 +30,69 @@
 
 <button
   type="button"
-  class="group relative flex flex-col overflow-hidden rounded-2xl bg-immich-bg text-left transition-all duration-500 hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-immich-primary focus-visible:ring-offset-2 dark:bg-immich-dark-gray {isShared
-    ? 'shadow-lg shadow-emerald-500/20 hover:shadow-xl hover:shadow-emerald-500/30 dark:shadow-emerald-500/15 dark:hover:shadow-emerald-500/25'
-    : 'shadow-lg shadow-gray-900/10 hover:shadow-xl hover:shadow-gray-900/20 dark:shadow-black/40 dark:hover:shadow-black/60'}"
-  onclick={handleClick}
+  class="group relative flex flex-col w-full max-w-xs overflow-hidden rounded-xl bg-immich-bg dark:bg-immich-dark-gray text-left shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-immich-primary {isShared
+    ? 'ring-1 ring-emerald-400/30'
+    : ''}"
+  on:click={handleClick}
 >
   <!-- Image Container -->
-  <div class="relative w-full aspect-[3/2] sm:aspect-[3/2] overflow-hidden bg-gray-100 dark:bg-gray-900">
+  <div class="relative w-full aspect-[3/2] overflow-hidden bg-gray-100 dark:bg-gray-900">
     {#if thumbnailUrl}
       <img
         src={thumbnailUrl}
         alt={event.eventName}
-        class="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+        class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
       />
-      <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
-
-      <!-- Title overlay on image -->
-      <div class="absolute bottom-0 left-0 right-0 p-5">
-        <h3 class="text-2xl font-semibold text-white drop-shadow-2xl line-clamp-2 leading-tight">
-          {event.eventName}
-        </h3>
-      </div>
-
-      <!-- Shared badge on image -->
-      {#if isShared}
-        <div class="absolute top-4 left-4">
-          <div
-            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full backdrop-blur-xl bg-gradient-to-r from-emerald-700 to-teal-800 shadow-2xl"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" class="text-white">
-              <path
-                fill="currentColor"
-                d="M12,5.5A3.5,3.5 0 0,1 15.5,9A3.5,3.5 0 0,1 12,12.5A3.5,3.5 0 0,1 8.5,9A3.5,3.5 0 0,1 12,5.5M5,8C5.56,8 6.08,8.15 6.53,8.42C6.38,9.85 6.8,11.27 7.66,12.38C7.16,13.34 6.16,14 5,14A3,3 0 0,1 2,11A3,3 0 0,1 5,8M19,8A3,3 0 0,1 22,11A3,3 0 0,1 19,14C17.84,14 16.84,13.34 16.34,12.38C17.2,11.27 17.62,9.85 17.47,8.42C17.92,8.15 18.44,8 19,8M5.5,18.25C5.5,16.18 8.41,14.5 12,14.5C15.59,14.5 18.5,16.18 18.5,18.25V20H5.5V18.25M0,20V18.5C0,17.11 1.89,15.94 4.45,15.6C3.86,16.28 3.5,17.22 3.5,18.25V20H0M24,20H20.5V18.25C20.5,17.22 20.14,16.28 19.55,15.6C22.11,15.94 24,17.11 24,18.5V20Z"
-              />
-            </svg>
-            <span class="text-sm font-semibold text-white tracking-wide">SHARED</span>
-          </div>
-        </div>
-      {/if}
+      <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
     {:else}
       <div
         class="flex h-full w-full items-center justify-center bg-gradient-to-br {isShared
-          ? 'from-emerald-400 to-teal-800'
-          : 'from-indigo-600 to-purple-800'}"
+          ? 'from-emerald-400 to-teal-700'
+          : 'from-indigo-500 to-purple-700'}"
       ></div>
+    {/if}
 
-      <!-- Title for no-image cards -->
-      <div class="absolute bottom-0 left-0 right-0 p-5">
-        <h3 class="text-2xl font-semibold text-white drop-shadow-2xl line-clamp-2 leading-tight">
-          {event.eventName}
-        </h3>
-      </div>
+    <!-- Title overlay -->
+    <div class="absolute bottom-0 left-0 right-0 p-4">
+      <h3 class="text-lg sm:text-xl font-semibold text-white drop-shadow-lg line-clamp-2">
+        {event.eventName}
+      </h3>
+    </div>
 
-      {#if isShared}
-        <div class="absolute top-4 left-4">
-          <div
-            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full backdrop-blur-xl bg-white/30 shadow-2xl ring-1 ring-white/40"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" class="text-white">
-              <path
-                fill="currentColor"
-                d="M12,5.5A3.5,3.5 0 0,1 15.5,9A3.5,3.5 0 0,1 12,12.5A3.5,3.5 0 0,1 8.5,9A3.5,3.5 0 0,1 12,5.5M5,8C5.56,8 6.08,8.15 6.53,8.42C6.38,9.85 6.8,11.27 7.66,12.38C7.16,13.34 6.16,14 5,14A3,3 0 0,1 2,11A3,3 0 0,1 5,8M19,8A3,3 0 0,1 22,11A3,3 0 0,1 19,14C17.84,14 16.84,13.34 16.34,12.38C17.2,11.27 17.62,9.85 17.47,8.42C17.92,8.15 18.44,8 19,8M5.5,18.25C5.5,16.18 8.41,14.5 12,14.5C15.59,14.5 18.5,16.18 18.5,18.25V20H5.5V18.25M0,20V18.5C0,17.11 1.89,15.94 4.45,15.6C3.86,16.28 3.5,17.22 3.5,18.25V20H0M24,20H20.5V18.25C20.5,17.22 20.14,16.28 19.55,15.6C22.11,15.94 24,17.11 24,18.5V20Z"
-              />
-            </svg>
-            <span class="text-sm font-bold text-white tracking-wide drop-shadow-md">SHARED</span>
-          </div>
+    <!-- Shared badge -->
+    {#if isShared}
+      <div class="absolute top-3 right-3">
+        <div
+          class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full backdrop-blur-sm bg-emerald-600/90 shadow-lg"
+        >
+          <Icon icon={mdiAccountCircleOutline} size="14" class="text-white" />
+          <span class="text-xs font-semibold text-white">SHARED</span>
         </div>
-      {/if}
+      </div>
     {/if}
   </div>
 
   <!-- Content Section -->
-  <div class="flex flex-col gap-2 p-4 bg-immich-bg dark:bg-immich-dark-gray">
-    <!-- Description (if exists) -->
+  <div class="flex flex-col gap-2 p-4 text-immich-fg dark:text-immich-dark-fg">
     {#if event.description}
-      <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed">
+      <p class="text-sm text-immich-fg/70 dark:text-gray line-clamp-2">
         {event.description}
       </p>
-    {:else}
-      <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed">&nbsp;</p>
     {/if}
-    <!-- Metadata -->
-    <div class="flex items-center justify-between gap-3 text-xs">
-      <div class="flex items-center gap-3">
-        <!-- Album count -->
-        <div class="flex items-center gap-1.5 text-immich-primary dark:text-immich-primary">
-          <svg width="16" height="16" viewBox="0 0 24 24">
-            <path fill="currentColor" d={mdiImageMultiple} />
-          </svg>
-          <span class="font-semibold">{event.albumCount}</span>
-        </div>
 
-        <!-- Owner -->
-        <div class="flex items-center gap-1.5 text-gray-600 dark:text-gray-400">
-          <Icon icon={mdiAccountCircleOutline} size="16" class="text-black" />
-          <!-- <svg width="14" height="14" viewBox="0 0 24 24" class="opacity-100">
-            <path
-              fill="currentColor"
-              d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"
-            />
-          </svg> -->
-          <span class="font-semibold truncate max-w-[120px] sm:max-w-[80px] text-black-600 dark:text-black-600">{event.owner.name}</span
-          >
-        </div>
+    <!-- Metadata -->
+    <div class="flex flex-wrap items-center gap-x-3 gap-y-3 text-xs text-immich-fg/60 dark:text-gray">
+      <div class="flex items-center gap-1 text-immich-primary">
+        <Icon icon={mdiImageMultiple} size="14" />
+        <span class="font-medium">{event.albumCount}</span>
       </div>
 
-      <!-- Date -->
-      <time class="font-medium text-gray-500 dark:text-gray-500">{updatedDate}</time>
+      <div class="flex items-center gap-1">
+        <Icon icon={mdiAccountCircleOutline} size="14" />
+        <span class="font-medium truncate max-w-[100px] sm:max-w-[120px]">{event.owner.name}</span>
+      </div>
+
+      <time class="font-medium whitespace-nowrap">{updatedDate}</time>
     </div>
   </div>
 </button>

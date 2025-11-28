@@ -42,7 +42,7 @@
     <EventControls {eventGroupNames} bind:searchQuery />
     <Button
       leadingIcon={mdiPlusBoxMultiple}
-      size="small"
+      size="medium"
       variant="ghost"
       color="secondary"
       href={`${AppRoute.EVENTS}/new`}
@@ -52,7 +52,7 @@
     </Button>
   {/snippet}
 
-  <section class="px-4 sm:px-6 md:px-8 pt-10 md:pt-10 pb-10 max-w-6xl mx-auto w-full">
+  <section class="px-4 sm:px-6 md:px-8 pt-10 md:pt-10 pb-10mx-auto w-full">
     <h1 class="pb-5">All your Events</h1>
     {#if events.length === 0}
       <div class="flex justify-center">

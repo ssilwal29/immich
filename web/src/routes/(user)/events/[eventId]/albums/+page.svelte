@@ -54,7 +54,7 @@
     </Button>
   </div>
 
-  <div class="xl:hidden flex items-center justify-between mb-4">
+  <div class="flex items-center justify-between mb-4">
     <div class="w-fit h-10 dark:text-immich-dark-fg">
       <GroupTab
         label={$t('show_albums')}
@@ -63,7 +63,7 @@
         onSelect={(selected) => ($albumViewSettings.filter = selected)}
       />
     </div>
-    <div class="sm:w-54 md:w-72 lg:w-90 ml-auto">
+    <div class="px-2 sm:w-48 md:w-72 lg:w-90 ml-auto">
       <SearchBar placeholder={$t('search_albums')} bind:name={searchQuery} showLoadingSpinner={false} />
     </div>
   </div>

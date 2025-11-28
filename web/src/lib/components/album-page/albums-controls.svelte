@@ -1,7 +1,5 @@
 <script lang="ts">
   import Dropdown from '$lib/elements/Dropdown.svelte';
-  import GroupTab from '$lib/elements/GroupTab.svelte';
-  import SearchBar from '$lib/elements/SearchBar.svelte';
   import {
     AlbumFilter,
     AlbumGroupBy,
@@ -132,19 +130,19 @@
 </script>
 
 <!-- Filter Albums by Sharing Status (All, Owned, Shared) -->
-<div class="hidden xl:block h-10">
+<!-- <div class="hidden xl:block h-10 px-2">
   <GroupTab
     label={$t('show_albums')}
     filters={Object.values(availableFilterNames)}
     selected={selectedFilterOption}
     onSelect={(selected) => handleChangeAlbumFilter(selected, AlbumFilter.All)}
   />
-</div>
+</div> -->
 
 <!-- Search Albums -->
-<div class="hidden xl:block h-10 xl:w-60 2xl:w-80">
+<!-- <div class="hidden xl:block h-10 xl:w-60 2xl:w-80">
   <SearchBar placeholder={$t('search_albums')} bind:name={searchQuery} showLoadingSpinner={false} />
-</div>
+</div> -->
 
 <!-- Create Album (only for event owners) -->
 {#if isEventOwner}
