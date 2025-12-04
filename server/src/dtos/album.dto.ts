@@ -45,6 +45,10 @@ export class CreateAlbumDto {
   @Optional()
   description?: string;
 
+  @ValidateUUID()
+  @ApiProperty({ required: true })
+  eventId!: string;
+
   @Optional()
   @IsArray()
   @ValidateNested({ each: true })
@@ -81,6 +85,9 @@ export class UpdateAlbumDto {
   @ValidateUUID({ optional: true })
   albumThumbnailAssetId?: string;
 
+  @ValidateUUID({ optional: true })
+  eventId?: string;
+
   @ValidateBoolean({ optional: true })
   isActivityEnabled?: boolean;
 
@@ -104,6 +111,13 @@ export class GetAlbumsDto {
    */
   @ValidateUUID({ optional: true })
   assetId?: string;
+
+  /**
+   * Only returns albums that belong to the event
+   * undefined: get all albums
+   */
+  @ValidateUUID({ optional: true })
+  eventId?: string;
 }
 
 export class AlbumStatisticsResponseDto {
@@ -144,6 +158,7 @@ export class AlbumResponseDto {
   createdAt!: Date;
   updatedAt!: Date;
   albumThumbnailAssetId!: string | null;
+  eventId!: string | null;
   shared!: boolean;
   albumUsers!: AlbumUserResponseDto[];
   hasSharedLink!: boolean;
@@ -151,6 +166,8 @@ export class AlbumResponseDto {
   owner!: UserResponseDto;
   @ApiProperty({ type: 'integer' })
   assetCount!: number;
+  @ApiProperty({ type: 'integer' })
+  totalAssetCount!: number;
   lastModifiedAssetTimestamp?: Date;
   startDate?: Date;
   endDate?: Date;
@@ -171,6 +188,7 @@ export type MapAlbumDto = {
   albumName: string;
   description: string;
   albumThumbnailAssetId: string | null;
+  eventId?: string | null;
   createdAt: Date;
   updatedAt: Date;
   id: string;
@@ -211,6 +229,7 @@ export const mapAlbum = (entity: MapAlbumDto, withAssets: boolean, auth?: AuthDt
     albumName: entity.albumName,
     description: entity.description,
     albumThumbnailAssetId: entity.albumThumbnailAssetId,
+    eventId: entity.eventId || null,
     createdAt: entity.createdAt,
     updatedAt: entity.updatedAt,
     id: entity.id,
@@ -223,6 +242,7 @@ export const mapAlbum = (entity: MapAlbumDto, withAssets: boolean, auth?: AuthDt
     endDate,
     assets: (withAssets ? assets : []).map((asset) => mapAsset(asset, { auth })),
     assetCount: entity.assets?.length || 0,
+    totalAssetCount: entity.assets?.length || 0,
     isActivityEnabled: entity.isActivityEnabled,
     order: entity.order,
   };

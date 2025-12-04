@@ -1,19 +1,19 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import {
-  AddUsersDto,
-  AlbumInfoDto,
-  AlbumResponseDto,
-  AlbumsAddAssetsDto,
-  AlbumsAddAssetsResponseDto,
-  AlbumStatisticsResponseDto,
-  CreateAlbumDto,
-  GetAlbumsDto,
-  mapAlbum,
-  MapAlbumDto,
-  mapAlbumWithAssets,
-  mapAlbumWithoutAssets,
-  UpdateAlbumDto,
-  UpdateAlbumUserDto,
+    AddUsersDto,
+    AlbumInfoDto,
+    AlbumResponseDto,
+    AlbumsAddAssetsDto,
+    AlbumsAddAssetsResponseDto,
+    AlbumStatisticsResponseDto,
+    CreateAlbumDto,
+    GetAlbumsDto,
+    mapAlbum,
+    MapAlbumDto,
+    mapAlbumWithAssets,
+    mapAlbumWithoutAssets,
+    UpdateAlbumDto,
+    UpdateAlbumUserDto,
 } from 'src/dtos/album.dto';
 import { BulkIdErrorReason, BulkIdResponseDto, BulkIdsDto } from 'src/dtos/asset-ids.response.dto';
 import { AuthDto } from 'src/dtos/auth.dto';
@@ -39,16 +39,22 @@ export class AlbumService extends BaseService {
     };
   }
 
-  async getAll({ user: { id: ownerId } }: AuthDto, { assetId, shared }: GetAlbumsDto): Promise<AlbumResponseDto[]> {
+  async getAll(
+    { user: { id: ownerId } }: AuthDto,
+    { assetId, shared, eventId }: GetAlbumsDto,
+  ): Promise<AlbumResponseDto[]> {
     await this.albumRepository.updateThumbnails();
 
     let albums: MapAlbumDto[];
     if (assetId) {
       albums = await this.albumRepository.getByAssetId(ownerId, assetId);
     } else if (shared === true) {
-      albums = await this.albumRepository.getShared(ownerId);
+      albums = await this.albumRepository.getShared(ownerId, eventId);
     } else if (shared === false) {
       albums = await this.albumRepository.getNotShared(ownerId);
+    } else if (eventId) {
+      // When eventId is specified without shared flag, get all accessible albums for that event
+      albums = await this.albumRepository.getAccessibleForEvent(ownerId, eventId);
     } else {
       albums = await this.albumRepository.getOwned(ownerId);
     }
@@ -67,6 +73,7 @@ export class AlbumService extends BaseService {
       startDate: albumMetadata[album.id]?.startDate ?? undefined,
       endDate: albumMetadata[album.id]?.endDate ?? undefined,
       assetCount: albumMetadata[album.id]?.assetCount ?? 0,
+      totalAssetCount: albumMetadata[album.id]?.totalAssetCount ?? 0,
       // lastModifiedAssetTimestamp is only used in mobile app, please remove if not need
       lastModifiedAssetTimestamp: albumMetadata[album.id]?.lastModifiedAssetTimestamp ?? undefined,
     }));
@@ -88,6 +95,7 @@ export class AlbumService extends BaseService {
       startDate: albumMetadataForIds?.startDate ?? undefined,
       endDate: albumMetadataForIds?.endDate ?? undefined,
       assetCount: albumMetadataForIds?.assetCount ?? 0,
+      totalAssetCount: albumMetadataForIds?.totalAssetCount ?? 0,
       lastModifiedAssetTimestamp: albumMetadataForIds?.lastModifiedAssetTimestamp ?? undefined,
       contributorCounts: isShared ? await this.albumRepository.getContributorCounts(album.id) : undefined,
     };
@@ -116,12 +124,17 @@ export class AlbumService extends BaseService {
 
     const userMetadata = await this.userRepository.getMetadata(auth.user.id);
 
+    if (!dto.eventId) {
+      throw new BadRequestException('Event ID is required');
+    }
+
     const album = await this.albumRepository.create(
       {
         ownerId: auth.user.id,
         albumName: dto.albumName,
         description: dto.description,
         albumThumbnailAssetId: assetIds[0] || null,
+        eventId: dto.eventId,
         order: getPreferences(userMetadata).albums.defaultAssetOrder,
       },
       assetIds,
@@ -151,6 +164,7 @@ export class AlbumService extends BaseService {
       albumName: dto.albumName,
       description: dto.description,
       albumThumbnailAssetId: dto.albumThumbnailAssetId,
+      eventId: dto.eventId ?? album.eventId,
       isActivityEnabled: dto.isActivityEnabled,
       order: dto.order,
     });

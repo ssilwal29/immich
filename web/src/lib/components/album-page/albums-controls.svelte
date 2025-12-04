@@ -1,7 +1,5 @@
 <script lang="ts">
   import Dropdown from '$lib/elements/Dropdown.svelte';
-  import GroupTab from '$lib/elements/GroupTab.svelte';
-  import SearchBar from '$lib/elements/SearchBar.svelte';
   import {
     AlbumFilter,
     AlbumGroupBy,
@@ -42,9 +40,12 @@
   interface Props {
     albumGroups: string[];
     searchQuery: string;
+    eventId?: string;
+    eventName?: string;
+    isEventOwner?: boolean;
   }
 
-  let { albumGroups, searchQuery = $bindable() }: Props = $props();
+  let { albumGroups, searchQuery = $bindable(), eventId, eventName, isEventOwner = true }: Props = $props();
 
   const flipOrdering = (ordering: string) => {
     return ordering === SortOrder.Asc ? SortOrder.Desc : SortOrder.Asc;
@@ -110,37 +111,58 @@
     [AlbumGroupBy.Owner]: $t('group_owner'),
     [AlbumGroupBy.Year]: $t('group_year'),
   });
+
+  // For event contexts where user is not owner, hide the Owned filter
+  let availableFilterNames = $derived.by(() => {
+    if (eventId && !isEventOwner) {
+      const { Owned, ...rest } = albumFilterNames;
+      return rest;
+    }
+    return albumFilterNames;
+  });
+
+  // Auto-switch from Owned to Shared if user is not event owner
+  $effect(() => {
+    if (eventId && !isEventOwner && $albumViewSettings.filter === AlbumFilter.Owned) {
+      $albumViewSettings.filter = AlbumFilter.Shared;
+    }
+  });
 </script>
 
 <!-- Filter Albums by Sharing Status (All, Owned, Shared) -->
-<div class="hidden xl:block h-10">
+<!-- <div class="hidden xl:block h-10 px-2">
   <GroupTab
     label={$t('show_albums')}
-    filters={Object.values(albumFilterNames)}
+    filters={Object.values(availableFilterNames)}
     selected={selectedFilterOption}
     onSelect={(selected) => handleChangeAlbumFilter(selected, AlbumFilter.All)}
   />
-</div>
+</div> -->
 
 <!-- Search Albums -->
-<div class="hidden xl:block h-10 xl:w-60 2xl:w-80">
+<!-- <div class="hidden xl:block h-10 xl:w-60 2xl:w-80">
   <SearchBar placeholder={$t('search_albums')} bind:name={searchQuery} showLoadingSpinner={false} />
-</div>
+</div> -->
 
-<!-- Create Album -->
-<Button
-  leadingIcon={mdiPlusBoxOutline}
-  onclick={() => createAlbumAndRedirect()}
-  size="small"
-  variant="ghost"
-  color="secondary"
->
-  <p class="hidden md:block">{$t('create_album')}</p>
-</Button>
+<!-- Create Album (only for event owners) -->
+{#if isEventOwner}
+  <div class="md:contents" title={$t('create_album')}>
+    <Button
+      leadingIcon={mdiPlusBoxOutline}
+      onclick={() => createAlbumAndRedirect(undefined, undefined, eventId, eventName)}
+      size="medium"
+      variant="ghost"
+      color="secondary"
+    >
+      <p class="hidden md:block">{$t('create_album')}</p>
+    </Button>
+  </div>
+{/if}
 
 <!-- Sort Albums -->
 <Dropdown
   title={$t('sort_albums_by')}
+  tooltip={$t('sort_albums_by')}
   options={Object.values(sortOptionsMetadata)}
   selectedOption={selectedSortOption}
   onSelect={handleChangeSortBy}
@@ -153,6 +175,7 @@
 <!-- Group Albums -->
 <Dropdown
   title={$t('group_albums_by')}
+  tooltip={$t('group_albums_by')}
   options={Object.values(groupOptionsMetadata)}
   selectedOption={selectedGroupOption}
   onSelect={handleChangeGroupBy}

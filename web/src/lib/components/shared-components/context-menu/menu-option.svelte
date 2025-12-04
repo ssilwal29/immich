@@ -14,6 +14,8 @@
     onClick: () => void;
     shortcut?: Shortcut | null;
     shortcutLabel?: string;
+    disabled?: boolean;
+    title?: string;
   }
 
   let {
@@ -25,6 +27,8 @@
     onClick,
     shortcut = null,
     shortcutLabel = '',
+    disabled = false,
+    title = '',
   }: Props = $props();
 
   let id: string = generateId();
@@ -32,6 +36,7 @@
   let isActive = $derived($selectedIdStore === id);
 
   const handleClick = () => {
+    if (disabled) return;
     $optionClickCallbackStore?.();
     onClick();
   };
@@ -50,16 +55,21 @@
 <!-- svelte-ignore a11y_mouse_events_have_key_events -->
 <li
   {id}
+  {title}
   onclick={handleClick}
   onmouseover={() => ($selectedIdStore = id)}
   onmouseleave={() => ($selectedIdStore = undefined)}
-  class="w-full p-4 text-start text-sm font-medium {textColor} focus:outline-none focus:ring-2 focus:ring-inset cursor-pointer border-gray-200 flex gap-2 items-center {isActive
+  class="w-full p-4 text-start text-sm font-medium {disabled
+    ? 'opacity-60 cursor-not-allowed text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-800'
+    : `${textColor} cursor-pointer`} focus:outline-none focus:ring-2 focus:ring-inset border-gray-200 flex gap-2 items-center {isActive &&
+  !disabled
     ? activeColor
     : 'bg-slate-100'}"
   role="menuitem"
+  aria-disabled={disabled}
 >
   {#if icon}
-    <Icon {icon} aria-hidden size="18" />
+    <Icon {icon} aria-hidden size="18" class={disabled ? 'text-gray-400 dark:text-gray-500' : ''} />
   {/if}
   <div class="w-full">
     <div class="flex justify-between">
@@ -71,7 +81,7 @@
       {/if}
     </div>
     {#if subtitle}
-      <p class="text-xs text-gray-500">
+      <p class="text-xs {disabled ? 'text-gray-400 dark:text-gray-600' : 'text-gray-500'}">
         {subtitle}
       </p>
     {/if}

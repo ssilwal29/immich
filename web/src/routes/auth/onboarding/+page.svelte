@@ -1,7 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
-  import OnboardingBackup from '$lib/components/onboarding-page/onboarding-backup.svelte';
   import OnboardingCard from '$lib/components/onboarding-page/onboarding-card.svelte';
   import OnboardingHello from '$lib/components/onboarding-page/onboarding-hello.svelte';
   import OnboardingLocale from '$lib/components/onboarding-page/onboarding-language.svelte';
@@ -16,14 +15,7 @@
   import { OnboardingRole } from '$lib/models/onboarding-role';
   import { user } from '$lib/stores/user.store';
   import { setUserOnboarding, updateAdminOnboarding } from '@immich/sdk';
-  import {
-    mdiCellphoneArrowDownVariant,
-    mdiCloudCheckOutline,
-    mdiHarddisk,
-    mdiIncognito,
-    mdiThemeLightDark,
-    mdiTranslate,
-  } from '@mdi/js';
+  import { mdiThemeLightDark, mdiTranslate } from '@mdi/js';
   import { onMount } from 'svelte';
   import { t } from 'svelte-i18n';
 
@@ -58,41 +50,41 @@
       title: $t('language'),
       icon: mdiTranslate,
     },
-    {
-      name: 'server_privacy',
-      component: OnboardingServerPrivacy,
-      role: OnboardingRole.SERVER,
-      title: $t('server_privacy'),
-      icon: mdiIncognito,
-    },
-    {
-      name: 'user_privacy',
-      component: OnboardingUserPrivacy,
-      role: OnboardingRole.USER,
-      title: $t('user_privacy'),
-      icon: mdiIncognito,
-    },
-    {
-      name: 'storage_template',
-      component: OnboardingStorageTemplate,
-      role: OnboardingRole.SERVER,
-      title: $t('admin.storage_template_settings'),
-      icon: mdiHarddisk,
-    },
-    {
-      name: 'backup',
-      component: OnboardingBackup,
-      role: OnboardingRole.SERVER,
-      title: $t('admin.backup_onboarding_title'),
-      icon: mdiCloudCheckOutline,
-    },
-    {
-      name: 'mobile_app',
-      component: OnboardingMobileApp,
-      role: OnboardingRole.USER,
-      title: $t('mobile_app'),
-      icon: mdiCellphoneArrowDownVariant,
-    },
+    // {
+    //   name: 'server_privacy',
+    //   component: OnboardingServerPrivacy,
+    //   role: OnboardingRole.SERVER,
+    //   title: $t('server_privacy'),
+    //   icon: mdiIncognito,
+    // },
+    // {
+    //   name: 'user_privacy',
+    //   component: OnboardingUserPrivacy,
+    //   role: OnboardingRole.USER,
+    //   title: $t('user_privacy'),
+    //   icon: mdiIncognito,
+    // },
+    // {
+    //   name: 'storage_template',
+    //   component: OnboardingStorageTemplate,
+    //   role: OnboardingRole.SERVER,
+    //   title: $t('admin.storage_template_settings'),
+    //   icon: mdiHarddisk,
+    // },
+    // {
+    //   name: 'backup',
+    //   component: OnboardingBackup,
+    //   role: OnboardingRole.SERVER,
+    //   title: $t('admin.backup_onboarding_title'),
+    //   icon: mdiCloudCheckOutline,
+    // },
+    // {
+    //   name: 'mobile_app',
+    //   component: OnboardingMobileApp,
+    //   role: OnboardingRole.USER,
+    //   title: $t('mobile_app'),
+    //   icon: mdiCellphoneArrowDownVariant,
+    // },
   ]);
 
   let index = $state(0);
@@ -139,7 +131,7 @@
         onboardingDto: { isOnboarded: true },
       });
 
-      await goto(AppRoute.PHOTOS);
+      await goto(AppRoute.EVENTS);
     } else {
       await goto(
         `${AppRoute.AUTH_ONBOARDING}?${QueryParameter.ONBOARDING_STEP}=${onboardingSteps[nextStepIndex].name}`,

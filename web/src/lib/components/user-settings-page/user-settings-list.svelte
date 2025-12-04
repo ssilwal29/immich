@@ -71,10 +71,10 @@
   >
     <UserUsageStatistic />
   </SettingAccordion>
-
+<!-- 
   <SettingAccordion icon={mdiApi} key="api-keys" title={$t('api_keys')} subtitle={$t('manage_your_api_keys')}>
     <UserAPIKeyList bind:keys />
-  </SettingAccordion>
+  </SettingAccordion> -->
 
   <SettingAccordion
     icon={mdiDevices}
@@ -94,14 +94,14 @@
     <DownloadSettings />
   </SettingAccordion>
 
-  <SettingAccordion
+  <!-- <SettingAccordion
     icon={mdiFeatureSearchOutline}
     key="feature"
     title={$t('features')}
     subtitle={$t('features_setting_description')}
   >
     <FeatureSettings />
-  </SettingAccordion>
+  </SettingAccordion> -->
 
   <SettingAccordion
     icon={mdiBellOutline}
@@ -133,16 +133,16 @@
     <ChangePasswordSettings />
   </SettingAccordion>
 
-  <SettingAccordion
+  <!-- <SettingAccordion
     icon={mdiAccountGroupOutline}
     key="partner-sharing"
     title={$t('partner_sharing')}
     subtitle={$t('manage_sharing_with_partners')}
   >
     <PartnerSettings user={$user} />
-  </SettingAccordion>
+  </SettingAccordion> -->
 
-  <SettingAccordion
+  <!-- <SettingAccordion
     icon={mdiLockSmart}
     key="user-pin-code-settings"
     title={$t('user_pin_code_settings')}
@@ -150,9 +150,9 @@
     autoScrollTo={true}
   >
     <ChangePinCodeSettings />
-  </SettingAccordion>
+  </SettingAccordion> -->
 
-  <SettingAccordion
+  <!-- <SettingAccordion
     icon={mdiKeyOutline}
     key="user-purchase-settings"
     title={$t('user_purchase_settings')}
@@ -160,5 +160,5 @@
     autoScrollTo={true}
   >
     <UserPurchaseSettings />
-  </SettingAccordion>
+  </SettingAccordion> -->
 </SettingAccordionState>

@@ -51,7 +51,7 @@
   let showNavigationLoadingBar = $state(false);
 
   const getMyImmichLink = () => {
-    return new URL(page.url.pathname + page.url.search, 'https://my.immich.app');
+    return new URL(page.url.pathname + page.url.search, 'https://dev.fotograph.app');
   };
 
   onMount(() => {
@@ -129,7 +129,7 @@
 </script>
 
 <svelte:head>
-  <title>{page.data.meta?.title || 'Web'} - Immich</title>
+  <title>{page.data.meta?.title || 'Web'} - fotograph</title>
   <link rel="manifest" href="/manifest.json" crossorigin="use-credentials" />
   <meta name="theme-color" content="currentColor" />
   <AppleHeader />

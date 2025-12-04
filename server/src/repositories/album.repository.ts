@@ -12,6 +12,7 @@ import { withDefaultVisibility } from 'src/utils/database';
 export interface AlbumAssetCount {
   albumId: string;
   assetCount: number;
+  totalAssetCount: number;
   startDate: Date | null;
   endDate: Date | null;
   lastModifiedAssetTimestamp: Date | null;
@@ -121,44 +122,88 @@ export class AlbumRepository {
       return [];
     }
 
-    return (
-      this.db
-        .selectFrom('asset')
-        .$call(withDefaultVisibility)
-        .innerJoin('album_asset', 'album_asset.assetId', 'asset.id')
-        .select('album_asset.albumId as albumId')
-        .select((eb) => eb.fn.min(sql<Date>`("asset"."localDateTime" AT TIME ZONE 'UTC'::text)::date`).as('startDate'))
-        .select((eb) => eb.fn.max(sql<Date>`("asset"."localDateTime" AT TIME ZONE 'UTC'::text)::date`).as('endDate'))
-        // lastModifiedAssetTimestamp is only used in mobile app, please remove if not need
-        .select((eb) => eb.fn.max('asset.updatedAt').as('lastModifiedAssetTimestamp'))
-        .select((eb) => sql<number>`${eb.fn.count('asset.id')}::int`.as('assetCount'))
-        .where('album_asset.albumId', 'in', ids)
-        .where('asset.deletedAt', 'is', null)
-        .groupBy('album_asset.albumId')
-        .execute()
-    );
+    const metadata = await this.db
+      .selectFrom('asset')
+      .$call(withDefaultVisibility)
+      .innerJoin('album_asset', 'album_asset.assetId', 'asset.id')
+      .select('album_asset.albumId as albumId')
+      .select((eb) => eb.fn.min(sql<Date>`("asset"."localDateTime" AT TIME ZONE 'UTC'::text)::date`).as('startDate'))
+      .select((eb) => eb.fn.max(sql<Date>`("asset"."localDateTime" AT TIME ZONE 'UTC'::text)::date`).as('endDate'))
+      // lastModifiedAssetTimestamp is only used in mobile app, please remove if not need
+      .select((eb) => eb.fn.max('asset.updatedAt').as('lastModifiedAssetTimestamp'))
+      .select((eb) => sql<number>`${eb.fn.count('asset.id')}::int`.as('assetCount'))
+      .where('album_asset.albumId', 'in', ids)
+      .where('asset.deletedAt', 'is', null)
+      .groupBy('album_asset.albumId')
+      .execute();
+
+    // Get total asset count including trashed assets
+    const totalCounts = await this.db
+      .selectFrom('album_asset')
+      .select('album_asset.albumId as albumId')
+      .select((eb) => sql<number>`${eb.fn.count('album_asset.assetId')}::int`.as('totalAssetCount'))
+      .where('album_asset.albumId', 'in', ids)
+      .groupBy('album_asset.albumId')
+      .execute();
+
+    // Create maps for efficient lookup
+    const metadataMap = new Map(metadata.map((m) => [m.albumId, m]));
+    const totalCountMap = new Map(totalCounts.map((tc) => [tc.albumId, tc.totalAssetCount]));
+
+    // Build results ensuring all albums with any assets (including only trashed) are included
+    const results: AlbumAssetCount[] = [];
+    const processedAlbumIds = new Set<string>();
+
+    // First, add albums that have non-trashed assets
+    for (const m of metadata) {
+      results.push({
+        ...m,
+        totalAssetCount: totalCountMap.get(m.albumId) || 0,
+      });
+      processedAlbumIds.add(m.albumId);
+    }
+
+    // Then, add albums that only have trashed assets
+    for (const [albumId, totalAssetCount] of totalCountMap) {
+      if (!processedAlbumIds.has(albumId)) {
+        results.push({
+          albumId,
+          assetCount: 0,
+          totalAssetCount,
+          startDate: null,
+          endDate: null,
+          lastModifiedAssetTimestamp: null,
+        });
+      }
+    }
+
+    return results;
   }
 
   @GenerateSql({ params: [DummyValue.UUID] })
-  async getOwned(ownerId: string) {
-    return this.db
+  async getOwned(ownerId: string, eventId?: string) {
+    let query = this.db
       .selectFrom('album')
       .selectAll('album')
       .select(withOwner)
       .select(withAlbumUsers)
       .select(withSharedLink)
       .where('album.ownerId', '=', ownerId)
-      .where('album.deletedAt', 'is', null)
-      .orderBy('album.createdAt', 'desc')
-      .execute();
+      .where('album.deletedAt', 'is', null);
+
+    if (eventId) {
+      query = query.where('album.eventId', '=', eventId);
+    }
+
+    return query.orderBy('album.createdAt', 'desc').execute();
   }
 
   /**
    * Get albums shared with and shared by owner.
    */
   @GenerateSql({ params: [DummyValue.UUID] })
-  async getShared(ownerId: string) {
-    return this.db
+  async getShared(ownerId: string, eventId?: string) {
+    let query = this.db
       .selectFrom('album')
       .selectAll('album')
       .where((eb) =>
@@ -177,7 +222,43 @@ export class AlbumRepository {
           ),
         ]),
       )
+      .where('album.deletedAt', 'is', null);
+
+    if (eventId) {
+      query = query.where('album.eventId', '=', eventId);
+    }
+
+    return query
+      .select(withAlbumUsers)
+      .select(withOwner)
+      .select(withSharedLink)
+      .orderBy('album.createdAt', 'desc')
+      .execute();
+  }
+
+  /**
+   * Get all albums accessible to user for an event (owned or shared with user)
+   */
+  @GenerateSql({ params: [DummyValue.UUID, DummyValue.UUID] })
+  async getAccessibleForEvent(userId: string, eventId: string) {
+    return this.db
+      .selectFrom('album')
+      .selectAll('album')
+      .where('album.eventId', '=', eventId)
       .where('album.deletedAt', 'is', null)
+      .where((eb) =>
+        eb.or([
+          // User owns the album
+          eb('album.ownerId', '=', userId),
+          // User has access via album_user
+          eb.exists(
+            eb
+              .selectFrom('album_user')
+              .whereRef('album_user.albumId', '=', 'album.id')
+              .where('album_user.userId', '=', userId),
+          ),
+        ]),
+      )
       .select(withAlbumUsers)
       .select(withOwner)
       .select(withSharedLink)

@@ -7,7 +7,6 @@
   import AlbumSummary from '$lib/components/album-page/album-summary.svelte';
   import AlbumTitle from '$lib/components/album-page/album-title.svelte';
   import ActivityStatus from '$lib/components/asset-viewer/activity-status.svelte';
-  import ActivityViewer from '$lib/components/asset-viewer/activity-viewer.svelte';
   import OnEvents from '$lib/components/OnEvents.svelte';
   import ButtonContextMenu from '$lib/components/shared-components/context-menu/button-context-menu.svelte';
   import MenuOption from '$lib/components/shared-components/context-menu/menu-option.svelte';
@@ -81,7 +80,6 @@
   } from '@mdi/js';
   import { onDestroy } from 'svelte';
   import { t } from 'svelte-i18n';
-  import { fly } from 'svelte/transition';
   import type { PageData } from './$types';
 
   interface Props {
@@ -89,13 +87,23 @@
   }
 
   let { data = $bindable() }: Props = $props();
+  const event = $derived(data.event);
+  let album = $derived(data.album);
+  let albumId = $derived(album.id);
+  const getDefaultBackUrl = () => {
+    const targetEventId = album.eventId ?? event?.id;
+    return targetEventId ? `${AppRoute.EVENTS}/${targetEventId}/albums` : AppRoute.ALBUMS;
+  };
 
   let { isViewing: showAssetViewer, setAssetId, gridScrollTarget } = assetViewingStore;
   let { slideshowState, slideshowNavigation } = slideshowStore;
 
+  let hasAssets = $derived((album.totalAssetCount ?? 0) > 0);
+  let canDeleteAlbum = $derived(!hasAssets);
+
   let oldAt: AssetGridRouteSearchParams | null | undefined = $state();
 
-  let backUrl: string = $state(AppRoute.ALBUMS);
+  let backUrl: string = $state(getDefaultBackUrl());
   let viewMode: AlbumPageViewMode = $state(AlbumPageViewMode.VIEW);
   let isCreatingSharedAlbum = $state(false);
   let isShowActivity = $state(false);
@@ -104,7 +112,12 @@
   const assetInteraction = new AssetInteraction();
   const timelineInteraction = new AssetInteraction();
 
-  afterNavigate(({ from }) => {
+  afterNavigate(({ from, to }) => {
+    // If navigating within the same album page (e.g., after upload), preserve backUrl
+    if (from?.route?.id === to?.route?.id && from?.params?.albumId === to?.params?.albumId) {
+      return;
+    }
+
     let url: string | undefined = from?.url?.pathname;
 
     const route = from?.route?.id;
@@ -112,16 +125,19 @@
       url = from?.url.href;
     }
 
-    if (isAlbumsRoute(route) || isPeopleRoute(route)) {
+    // Don't override to /albums if coming from event routes
+    const isFromEventRoute = from?.url?.pathname?.includes('/events/');
+
+    if (!isFromEventRoute && (isAlbumsRoute(route) || isPeopleRoute(route))) {
       url = AppRoute.ALBUMS;
     }
 
-    backUrl = url || AppRoute.ALBUMS;
+    backUrl = url || getDefaultBackUrl();
 
     if (backUrl === AppRoute.SHARING && album.albumUsers.length === 0 && !album.hasSharedLink) {
       isCreatingSharedAlbum = true;
     } else if (backUrl === AppRoute.SHARED_LINKS) {
-      backUrl = history.state?.backUrl || AppRoute.ALBUMS;
+      backUrl = history.state?.backUrl || getDefaultBackUrl();
     }
   });
 
@@ -287,9 +303,6 @@
     }
   });
 
-  let album = $derived(data.album);
-  let albumId = $derived(album.id);
-
   $effect(() => {
     if (!album.isActivityEnabled && activityManager.commentCount === 0) {
       isShowActivity = false;
@@ -430,18 +443,18 @@
       >
         {#if viewMode !== AlbumPageViewMode.SELECT_ASSETS}
           {#if viewMode !== AlbumPageViewMode.SELECT_THUMBNAIL}
-            <!-- ALBUM TITLE -->
-            <section class="pt-8 md:pt-24">
+            <!-- ALBUM HEADER -->
+            <section class="pt-8 md:pt-24 mb-6">
+              {#if album.assetCount > 0 || event}
+                <AlbumSummary {album} {event} />
+              {/if}
+
               <AlbumTitle
                 id={album.id}
                 albumName={album.albumName}
                 {isOwned}
                 onUpdate={(albumName) => (album.albumName = albumName)}
               />
-
-              {#if album.assetCount > 0}
-                <AlbumSummary {album} />
-              {/if}
 
               <!-- ALBUM SHARING -->
               {#if album.albumUsers.length > 0 || (album.hasSharedLink && isOwned)}
@@ -501,18 +514,27 @@
 
           {#if album.assetCount === 0}
             <section id="empty-album" class=" mt-50 flex place-content-center place-items-center">
-              <div class="w-75">
-                <p class="uppercase text-xs dark:text-immich-dark-fg">{$t('add_photos')}</p>
-                <button
-                  type="button"
-                  onclick={() => (viewMode = AlbumPageViewMode.SELECT_ASSETS)}
-                  class="mt-5 bg-subtle flex w-full place-items-center gap-6 rounded-2xl border px-8 py-8 text-immich-fg transition-all hover:bg-gray-100 dark:hover:bg-gray-500/20 hover:text-immich-primary dark:border-none dark:text-immich-dark-fg dark:hover:text-immich-dark-primary"
-                >
-                  <span class="text-primary">
-                    <Icon icon={mdiPlus} size="24" />
-                  </span>
-                  <span class="text-lg">{$t('select_photos')}</span>
-                </button>
+              <div class="w-full max-w-2xl">
+                <p class="uppercase text-xs dark:text-immich-dark-fg mb-4">{$t('add_photos')}</p>
+                <div class="flex flex-col gap-4">
+                  <button
+                    type="button"
+                    onclick={handleSelectFromComputer}
+                    class="bg-subtle flex w-full place-items-center gap-6 rounded-2xl border px-8 py-8 text-immich-fg transition-all hover:bg-gray-100 dark:hover:bg-gray-500/20 hover:text-immich-primary dark:border-none dark:text-immich-dark-fg dark:hover:text-immich-dark-primary"
+                  >
+                    <span class="text-primary">
+                      <Icon icon={mdiUpload} size="24" />
+                    </span>
+                    <span class="text-lg">{$t('upload_from_computer')}</span>
+                  </button>
+                  {#if event}
+                    <div class="flex justify-end mt-4">
+                      <Button onclick={() => goto(`${AppRoute.EVENTS}/${event.id}/albums`)}>
+                        {$t('save')}
+                      </Button>
+                    </div>
+                  {/if}
+                </div>
               </div>
             </section>
           {/if}
@@ -538,12 +560,12 @@
         assets={assetInteraction.selectedAssets}
         clearSelect={() => assetInteraction.clearMultiselect()}
       >
-        <CreateSharedLink />
+        <!-- <CreateSharedLink /> -->
         <SelectAllAssets {timelineManager} {assetInteraction} />
-        <ButtonContextMenu icon={mdiPlus} title={$t('add_to')}>
+        <!-- <ButtonContextMenu icon={mdiPlus} title={$t('add_to')}>
           <AddToAlbum />
           <AddToAlbum shared />
-        </ButtonContextMenu>
+        </ButtonContextMenu> -->
         {#if assetInteraction.isAllUserOwned}
           <FavoriteAction
             removeFavorite={assetInteraction.isAllFavorite}
@@ -567,17 +589,17 @@
                 onClick={() => updateThumbnailUsingCurrentSelection()}
               />
             {/if}
-            <ArchiveAction menuItem unarchive={assetInteraction.isAllArchived} />
-            <SetVisibilityAction menuItem onVisibilitySet={handleSetVisibility} />
+            <!-- <ArchiveAction menuItem unarchive={assetInteraction.isAllArchived} /> -->
+            <!-- <SetVisibilityAction menuItem onVisibilitySet={handleSetVisibility} /> -->
           {/if}
 
           {#if $preferences.tags.enabled && assetInteraction.isAllUserOwned}
             <TagAction menuItem />
           {/if}
 
-          {#if isOwned || assetInteraction.isAllUserOwned}
+          <!-- {#if isOwned || assetInteraction.isAllUserOwned}
             <RemoveFromAlbum menuItem bind:album onRemove={handleRemoveAssets} />
-          {/if}
+          {/if} -->
           {#if assetInteraction.isAllUserOwned}
             <DeleteAssets menuItem onAssetDelete={handleRemoveAssets} onUndoDelete={handleUndoRemoveAssets} />
           {/if}
@@ -595,15 +617,7 @@
                 shape="round"
                 color="secondary"
                 aria-label={$t('add_photos')}
-                onclick={async () => {
-                  timelineManager.suspendTransitions = true;
-                  viewMode = AlbumPageViewMode.SELECT_ASSETS;
-                  oldAt = { at: $gridScrollTarget?.at };
-                  await navigate(
-                    { targetRoute: 'current', assetId: null, assetGridRouteSearchParams: { at: null } },
-                    { replaceState: true },
-                  );
-                }}
+                onclick={handleSelectFromComputer}
                 icon={mdiImagePlusOutline}
               />
             {/if}
@@ -658,11 +672,20 @@
                   <MenuOption icon={mdiCogOutline} text={$t('options')} onClick={handleOptions} />
                 {/if}
 
-                <MenuOption
-                  icon={mdiDeleteOutline}
-                  text={$t('delete_album')}
-                  onClick={() => handleDeleteAlbum(album)}
-                />
+                {#if canDeleteAlbum}
+                  <MenuOption
+                    icon={mdiDeleteOutline}
+                    text={$t('delete_album')}
+                    onClick={() => handleDeleteAlbum(album)}
+                  />
+                {:else}
+                  <MenuOption
+                    icon={mdiDeleteOutline}
+                    text={$t('delete_album_not_empty')}
+                    subtitle={$t('delete_album_not_empty_description')}
+                    disabled
+                  />
+                {/if}
               </ButtonContextMenu>
             {/if}
 
@@ -718,6 +741,7 @@
           disabled={!album.isActivityEnabled}
           albumOwnerId={album.ownerId}
           albumId={album.id}
+          eventId={album.eventId ?? event?.id}
           onClose={handleOpenAndCloseActivityTab}
         />
       </div>

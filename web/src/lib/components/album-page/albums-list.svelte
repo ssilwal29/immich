@@ -7,7 +7,6 @@
   import MenuOption from '$lib/components/shared-components/context-menu/menu-option.svelte';
   import RightClickContextMenu from '$lib/components/shared-components/context-menu/right-click-context-menu.svelte';
   import ToastAction from '$lib/components/ToastAction.svelte';
-  import { AppRoute } from '$lib/constants';
   import AlbumEditModal from '$lib/modals/AlbumEditModal.svelte';
   import AlbumShareModal from '$lib/modals/AlbumShareModal.svelte';
   import SharedLinkCreateModal from '$lib/modals/SharedLinkCreateModal.svelte';
@@ -23,7 +22,13 @@
   } from '$lib/stores/preferences.store';
   import { user } from '$lib/stores/user.store';
   import { userInteraction } from '$lib/stores/user.svelte';
-  import { getSelectedAlbumGroupOption, sortAlbums, stringToSortOrder, type AlbumGroup } from '$lib/utils/album-utils';
+  import {
+    buildAlbumRoute,
+    getSelectedAlbumGroupOption,
+    sortAlbums,
+    stringToSortOrder,
+    type AlbumGroup,
+  } from '$lib/utils/album-utils';
   import type { ContextMenuPosition } from '$lib/utils/context-menu';
   import { handleError } from '$lib/utils/handle-error';
   import { normalizeSearchString } from '$lib/utils/string-utils';
@@ -191,6 +196,8 @@
   });
 
   let showFullContextMenu = $derived(allowEdit && selectedAlbum && selectedAlbum.ownerId === $user.id);
+  let hasAssets = $derived((selectedAlbum?.totalAssetCount ?? 0) > 0);
+  let canDelete = $derived(showFullContextMenu && !hasAssets);
 
   onMount(async () => {
     if (allowEdit) {
@@ -290,7 +297,7 @@
           text: $t('view_album'),
           color: 'primary',
           onClick() {
-            return goto(resolve(`${AppRoute.ALBUMS}/${album.id}`));
+            return goto(resolve(buildAlbumRoute(album.id, album.eventId)));
           },
         },
       },
@@ -367,6 +374,10 @@
   {/if}
   <MenuOption icon={mdiDownload} text={$t('download')} onClick={() => handleSelect('download')} />
   {#if showFullContextMenu}
-    <MenuOption icon={mdiDeleteOutline} text={$t('delete')} onClick={() => handleSelect('delete')} />
+    {#if canDelete}
+      <MenuOption icon={mdiDeleteOutline} text={$t('delete')} onClick={() => handleSelect('delete')} />
+    {:else}
+      <MenuOption icon={mdiDeleteOutline} text={$t('delete_album_not_empty')} subtitle={$t('delete_album_not_empty_description')} disabled />
+    {/if}
   {/if}
 </RightClickContextMenu>
