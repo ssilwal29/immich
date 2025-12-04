@@ -188,8 +188,8 @@ class PeopleResponse {
 }
 
 class TagsResponse {
-  enabled: boolean = true;
-  sidebarWeb: boolean = true;
+  enabled: boolean = false;
+  sidebarWeb: boolean = false;
 }
 
 class SharedLinksResponse {
@@ -216,7 +216,7 @@ class PurchaseResponse {
 }
 
 class CastResponse {
-  gCastEnabled: boolean = false;
+  gCastEnabled: boolean = true;
 }
 
 export class UserPreferencesResponseDto implements UserPreferences {

@@ -98,6 +98,9 @@
   let { isViewing: showAssetViewer, setAssetId, gridScrollTarget } = assetViewingStore;
   let { slideshowState, slideshowNavigation } = slideshowStore;
 
+  let hasAssets = $derived((album.totalAssetCount ?? 0) > 0);
+  let canDeleteAlbum = $derived(!hasAssets);
+
   let oldAt: AssetGridRouteSearchParams | null | undefined = $state();
 
   let backUrl: string = $state(getDefaultBackUrl());
@@ -669,11 +672,20 @@
                   <MenuOption icon={mdiCogOutline} text={$t('options')} onClick={handleOptions} />
                 {/if}
 
-                <MenuOption
-                  icon={mdiDeleteOutline}
-                  text={$t('delete_album')}
-                  onClick={() => handleDeleteAlbum(album)}
-                />
+                {#if canDeleteAlbum}
+                  <MenuOption
+                    icon={mdiDeleteOutline}
+                    text={$t('delete_album')}
+                    onClick={() => handleDeleteAlbum(album)}
+                  />
+                {:else}
+                  <MenuOption
+                    icon={mdiDeleteOutline}
+                    text={$t('delete_album_not_empty')}
+                    subtitle={$t('delete_album_not_empty_description')}
+                    disabled
+                  />
+                {/if}
               </ButtonContextMenu>
             {/if}
 

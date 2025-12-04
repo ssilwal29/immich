@@ -166,6 +166,8 @@ export class AlbumResponseDto {
   owner!: UserResponseDto;
   @ApiProperty({ type: 'integer' })
   assetCount!: number;
+  @ApiProperty({ type: 'integer' })
+  totalAssetCount!: number;
   lastModifiedAssetTimestamp?: Date;
   startDate?: Date;
   endDate?: Date;
@@ -240,6 +242,7 @@ export const mapAlbum = (entity: MapAlbumDto, withAssets: boolean, auth?: AuthDt
     endDate,
     assets: (withAssets ? assets : []).map((asset) => mapAsset(asset, { auth })),
     assetCount: entity.assets?.length || 0,
+    totalAssetCount: entity.assets?.length || 0,
     isActivityEnabled: entity.isActivityEnabled,
     order: entity.order,
   };

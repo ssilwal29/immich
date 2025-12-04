@@ -202,8 +202,8 @@
         {/if} -->
 
         {#if isOwner}
-          <AddToStackAction {asset} {stack} {onAction} />
-          {#if stack}
+          <!-- <AddToStackAction {asset} {stack} {onAction} /> -->
+          <!-- {#if stack}
             <UnstackAction {stack} {onAction} />
             <KeepThisDeleteOthersAction {stack} {asset} {onAction} />
             {#if stack?.primaryAssetId !== asset.id}
@@ -212,7 +212,7 @@
                 <RemoveAssetFromStack {asset} {stack} {onAction} />
               {/if}
             {/if}
-          {/if}
+          {/if} -->
           {#if album}
             <SetAlbumCoverAction {asset} {album} />
           {/if}

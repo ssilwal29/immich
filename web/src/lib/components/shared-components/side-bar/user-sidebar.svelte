@@ -1,6 +1,5 @@
 <script lang="ts">
   import { resolve } from '$app/paths';
-  import BottomInfo from '$lib/components/shared-components/side-bar/bottom-info.svelte';
   import Sidebar from '$lib/components/sidebar/sidebar.svelte';
   import { featureFlagsManager } from '$lib/managers/feature-flags-manager.svelte';
   import { preferences } from '$lib/stores/user.store';
@@ -9,23 +8,10 @@
     mdiAccountMultiple,
     mdiAccountMultipleOutline,
     mdiAccountOutline,
-    mdiArchiveArrowDown,
-    mdiArchiveArrowDownOutline,
     mdiCalendarBlank,
-    mdiFolderOutline,
     mdiHeart,
     mdiHeartOutline,
-    mdiImageMultiple,
-    mdiImageMultipleOutline,
     mdiLink,
-    mdiLock,
-    mdiLockOutline,
-    mdiMagnify,
-    mdiMap,
-    mdiMapOutline,
-    mdiTagMultipleOutline,
-    mdiToolbox,
-    mdiToolboxOutline,
     mdiTrashCan,
     mdiTrashCanOutline,
   } from '@mdi/js';
@@ -44,7 +30,7 @@
 </script>
 
 <Sidebar ariaLabel={$t('primary')}>
- <SideBarLink title={$t('events')} href={resolve('/(user)/events')} icon={mdiCalendarBlank} flippedLogo />
+  <SideBarLink title={$t('events')} href={resolve('/(user)/events')} icon={mdiCalendarBlank} flippedLogo />
   <!-- <SideBarLink
     title={$t('photos')}
     href={resolve('/(user)/photos')}
@@ -52,18 +38,18 @@
     icon={isPhotosSelected ? mdiImageMultiple : mdiImageMultipleOutline}
   ></SideBarLink> -->
 
-  {#if featureFlagsManager.value.search}
+  <!-- {#if featureFlagsManager.value.search}
     <SideBarLink title={$t('explore')} href={resolve('/(user)/explore')} icon={mdiMagnify} />
-  {/if}
+  {/if} -->
 
-  {#if featureFlagsManager.value.map}
+  <!-- {#if featureFlagsManager.value.map}
     <SideBarLink
       title={$t('map')}
       href={resolve('/(user)/map')}
       bind:isSelected={isMapSelected}
       icon={isMapSelected ? mdiMap : mdiMapOutline}
     />
-  {/if}
+  {/if} -->
 
   {#if $preferences.people.enabled && $preferences.people.sidebarWeb}
     <SideBarLink
@@ -85,7 +71,7 @@
     bind:isSelected={isSharingSelected}
   ></SideBarLink>
 
-  <p class="text-xs p-6 dark:text-immich-dark-fg uppercase">{$t('library')}</p>
+  <!-- <p class="text-xs p-6 dark:text-immich-dark-fg uppercase">{$t('library')}</p> -->
 
   <SideBarLink
     title={$t('favorites')}
@@ -94,29 +80,21 @@
     bind:isSelected={isFavoritesSelected}
   ></SideBarLink>
 
-  <!-- <SideBarLink
-    title={$t('albums')}
-    href={resolve('/(user)/albums')}
-    icon={mdiImageAlbum}
-    flippedLogo
-    bind:dropdownOpen={$recentAlbumsDropdown}
-  >
-    {#snippet dropDownContent()}
+  <!-- <SideBarLink title={$t('albums')} href={resolve('/(user)/events/albums')} icon={mdiImageAlbum} /> -->
+  <!-- {#snippet dropDownContent()}
       <span in:fly={{ y: -20 }} class="hidden md:block">
         <RecentAlbums />
       </span>
-    {/snippet}
-  </SideBarLink> -->
+    {/snippet} -->
+  <!-- </SideBarLink> -->
 
- 
-
-  {#if $preferences.tags.enabled && $preferences.tags.sidebarWeb}
+  <!-- {#if $preferences.tags.enabled && $preferences.tags.sidebarWeb}
     <SideBarLink title={$t('tags')} href={resolve('/(user)/tags')} icon={mdiTagMultipleOutline} flippedLogo />
-  {/if}
+  {/if} -->
 
-  {#if $preferences.folders.enabled && $preferences.folders.sidebarWeb}
+  <!-- {#if $preferences.folders.enabled && $preferences.folders.sidebarWeb}
     <SideBarLink title={$t('folders')} href={resolve('/(user)/folders')} icon={mdiFolderOutline} flippedLogo />
-  {/if}
+  {/if} -->
 
   <!-- <SideBarLink
     title={$t('utilities')}
@@ -148,5 +126,5 @@
     ></SideBarLink>
   {/if}
 
-  <BottomInfo />
+  <!-- <BottomInfo /> -->
 </Sidebar>

@@ -13,9 +13,11 @@
       name: string;
       events: EventResponseDto[];
     };
+    onEventDelete?: (eventId: string) => void;
+    onEventUpdate?: (event: EventResponseDto) => void;
   }
 
-  let { eventGroup }: Props = $props();
+  let { eventGroup, onEventDelete, onEventUpdate }: Props = $props();
 
   let isCollapsed = $derived(isEventGroupCollapsed($eventViewSettings, eventGroup.id));
 </script>
@@ -46,7 +48,7 @@
       class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6 p-4"
     >
       {#each eventGroup.events as event (event.id)}
-        <EventCard {event} />
+        <EventCard {event} onDelete={onEventDelete} onUpdate={onEventUpdate} />
       {/each}
     </div>
   {/if}

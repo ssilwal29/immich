@@ -25,6 +25,7 @@
     controlable?: boolean;
     hideTextOnSmallScreen?: boolean;
     title?: string | undefined;
+    tooltip?: string | undefined;
     position?: 'bottom-left' | 'bottom-right';
     onSelect: (option: T) => void;
     onClickOutside?: () => void;
@@ -40,6 +41,7 @@
     controlable = false,
     hideTextOnSmallScreen = true,
     title = undefined,
+    tooltip = undefined,
     onSelect,
     onClickOutside = () => {},
     render = String,
@@ -96,9 +98,9 @@
 
 <div use:clickOutside={{ onOutclick: handleClickOutside, onEscape: handleClickOutside }} class="relative">
   <!-- BUTTON TITLE -->
-  <Button onclick={() => (showMenu = true)} fullWidth {title} variant="ghost" color="secondary" size="small">
+  <Button onclick={() => (showMenu = true)} fullWidth title={tooltip || title} variant="ghost" color="secondary" size="small" class="justify-self-start">
     {#if renderedSelectedOption?.icon}
-      <Icon icon={renderedSelectedOption.icon} />
+      <Icon icon={renderedSelectedOption.icon} size="24" />
     {/if}
     <Text class={hideTextOnSmallScreen ? 'hidden sm:block' : ''}>{renderedSelectedOption.title}</Text>
   </Button>

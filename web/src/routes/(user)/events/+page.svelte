@@ -8,13 +8,14 @@
   import { AppRoute } from '$lib/constants';
   import { EventGroupBy, eventViewSettings } from '$lib/stores/preferences.store';
   import { getSelectedEventGroupOption, groupEvents, sortEvents } from '$lib/utils/event-utils';
+  import type { EventResponseDto } from '@immich/sdk';
   import { Button } from '@immich/ui';
   import { mdiPlusBoxMultiple } from '@mdi/js';
   import { t } from 'svelte-i18n';
   import type { PageData } from './$types';
 
   let { data }: { data: PageData } = $props();
-  let events = $derived(data.events);
+  let events = $state(data.events);
 
   let searchQuery = $state('');
 
@@ -34,6 +35,14 @@
   const handleCreateEvent = (event?: Event) => {
     event?.preventDefault();
     void goto(`${AppRoute.EVENTS}/new`);
+  };
+
+  const handleEventDelete = (eventId: string) => {
+    events = events.filter((event) => event.id !== eventId);
+  };
+
+  const handleEventUpdate = (updatedEvent: EventResponseDto) => {
+    events = events.map((event) => (event.id === updatedEvent.id ? updatedEvent : event));
   };
 </script>
 
@@ -66,10 +75,10 @@
       </div>
     {:else if isGrouped}
       {#each groupedEvents as eventGroup (eventGroup.id)}
-        <EventCardGroup {eventGroup} />
+        <EventCardGroup {eventGroup} onEventDelete={handleEventDelete} onEventUpdate={handleEventUpdate} />
       {/each}
     {:else}
-      <EventList events={sortedEvents} />
+      <EventList events={sortedEvents} onEventDelete={handleEventDelete} onEventUpdate={handleEventUpdate} />
     {/if}
   </section>
 </UserPageLayout>

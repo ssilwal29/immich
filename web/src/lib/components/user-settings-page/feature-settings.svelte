@@ -38,7 +38,7 @@
   let tagsSidebar = $state($preferences?.tags?.sidebarWeb ?? false);
 
   // Cast
-  let gCastEnabled = $state($preferences?.cast?.gCastEnabled ?? false);
+  let gCastEnabled = $state($preferences?.cast?.gCastEnabled ?? true);
 
   const handleSave = async () => {
     try {

@@ -98,7 +98,9 @@
 
 <!-- Group Events -->
 <Dropdown
+  class="ml-2"
   title={$t('group_events_by')}
+  tooltip={$t('group_events_by')}
   options={Object.values(groupOptionsMetadata)}
   selectedOption={selectedGroupOption}
   onSelect={handleChangeGroupBy}

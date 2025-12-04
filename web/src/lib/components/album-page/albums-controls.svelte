@@ -146,20 +146,23 @@
 
 <!-- Create Album (only for event owners) -->
 {#if isEventOwner}
-  <Button
-    leadingIcon={mdiPlusBoxOutline}
-    onclick={() => createAlbumAndRedirect(undefined, undefined, eventId, eventName)}
-    size="medium"
-    variant="ghost"
-    color="secondary"
-  >
-    <p class="hidden md:block">{$t('create_album')}</p>
-  </Button>
+  <div class="md:contents" title={$t('create_album')}>
+    <Button
+      leadingIcon={mdiPlusBoxOutline}
+      onclick={() => createAlbumAndRedirect(undefined, undefined, eventId, eventName)}
+      size="medium"
+      variant="ghost"
+      color="secondary"
+    >
+      <p class="hidden md:block">{$t('create_album')}</p>
+    </Button>
+  </div>
 {/if}
 
 <!-- Sort Albums -->
 <Dropdown
   title={$t('sort_albums_by')}
+  tooltip={$t('sort_albums_by')}
   options={Object.values(sortOptionsMetadata)}
   selectedOption={selectedSortOption}
   onSelect={handleChangeSortBy}
@@ -172,6 +175,7 @@
 <!-- Group Albums -->
 <Dropdown
   title={$t('group_albums_by')}
+  tooltip={$t('group_albums_by')}
   options={Object.values(groupOptionsMetadata)}
   selectedOption={selectedGroupOption}
   onSelect={handleChangeGroupBy}

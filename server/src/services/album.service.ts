@@ -1,19 +1,19 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import {
-  AddUsersDto,
-  AlbumInfoDto,
-  AlbumResponseDto,
-  AlbumsAddAssetsDto,
-  AlbumsAddAssetsResponseDto,
-  AlbumStatisticsResponseDto,
-  CreateAlbumDto,
-  GetAlbumsDto,
-  mapAlbum,
-  MapAlbumDto,
-  mapAlbumWithAssets,
-  mapAlbumWithoutAssets,
-  UpdateAlbumDto,
-  UpdateAlbumUserDto,
+    AddUsersDto,
+    AlbumInfoDto,
+    AlbumResponseDto,
+    AlbumsAddAssetsDto,
+    AlbumsAddAssetsResponseDto,
+    AlbumStatisticsResponseDto,
+    CreateAlbumDto,
+    GetAlbumsDto,
+    mapAlbum,
+    MapAlbumDto,
+    mapAlbumWithAssets,
+    mapAlbumWithoutAssets,
+    UpdateAlbumDto,
+    UpdateAlbumUserDto,
 } from 'src/dtos/album.dto';
 import { BulkIdErrorReason, BulkIdResponseDto, BulkIdsDto } from 'src/dtos/asset-ids.response.dto';
 import { AuthDto } from 'src/dtos/auth.dto';
@@ -73,6 +73,7 @@ export class AlbumService extends BaseService {
       startDate: albumMetadata[album.id]?.startDate ?? undefined,
       endDate: albumMetadata[album.id]?.endDate ?? undefined,
       assetCount: albumMetadata[album.id]?.assetCount ?? 0,
+      totalAssetCount: albumMetadata[album.id]?.totalAssetCount ?? 0,
       // lastModifiedAssetTimestamp is only used in mobile app, please remove if not need
       lastModifiedAssetTimestamp: albumMetadata[album.id]?.lastModifiedAssetTimestamp ?? undefined,
     }));
@@ -94,6 +95,7 @@ export class AlbumService extends BaseService {
       startDate: albumMetadataForIds?.startDate ?? undefined,
       endDate: albumMetadataForIds?.endDate ?? undefined,
       assetCount: albumMetadataForIds?.assetCount ?? 0,
+      totalAssetCount: albumMetadataForIds?.totalAssetCount ?? 0,
       lastModifiedAssetTimestamp: albumMetadataForIds?.lastModifiedAssetTimestamp ?? undefined,
       contributorCounts: isShared ? await this.albumRepository.getContributorCounts(album.id) : undefined,
     };

@@ -1,20 +1,68 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import { clickOutside } from '$lib/actions/click-outside';
   import { AppRoute } from '$lib/constants';
+  import EventEditModal from '$lib/modals/EventEditModal.svelte';
   import { getAssetThumbnailUrl } from '$lib/utils';
-  import { AssetMediaSize, type EventResponseDto } from '@immich/sdk';
-  import { Icon } from '@immich/ui';
-  import { mdiAccountCircleOutline, mdiImageMultiple } from '@mdi/js';
+  import { handleError } from '$lib/utils/handle-error';
+  import { AssetMediaSize, deleteEvent, type EventResponseDto } from '@immich/sdk';
+  import { Icon, modalManager, toastManager } from '@immich/ui';
+  import {
+    mdiAccountCircleOutline,
+    mdiDotsVertical,
+    mdiImageMultiple,
+    mdiPencilOutline,
+    mdiTrashCanOutline,
+  } from '@mdi/js';
   import { t } from 'svelte-i18n';
 
   interface Props {
     event: EventResponseDto;
+    onDelete?: (eventId: string) => void;
+    onUpdate?: (event: EventResponseDto) => void;
   }
 
-  let { event }: Props = $props();
+  let { event = $bindable(), onDelete, onUpdate }: Props = $props();
+
+  let showMenu = $state(false);
+  let isOwner = $derived(event.isOwner === true);
+  let hasAlbums = $derived((event.albumCount ?? 0) > 0);
+  let canDelete = $derived(isOwner && !hasAlbums);
 
   const handleClick = () => {
     goto(`${AppRoute.EVENTS}/${event.id}/albums`);
+  };
+
+  const handleEdit = async () => {
+    showMenu = false;
+    const modal = await modalManager.open(EventEditModal, { event });
+    const updatedEvent = await modal;
+    if (updatedEvent && onUpdate) {
+      onUpdate(updatedEvent);
+    }
+  };
+
+  const handleDelete = async () => {
+    showMenu = false;
+
+    const isConfirmed = await modalManager.showDialog({
+      prompt: `Are you sure you want to delete "${event.eventName}"?`,
+      confirmText: $t('delete'),
+    });
+
+    if (!isConfirmed) {
+      return;
+    }
+
+    try {
+      await deleteEvent({ id: event.id });
+      toastManager.success($t('event_deleted'));
+      if (onDelete) {
+        onDelete(event.id);
+      }
+    } catch (error) {
+      handleError(error, $t('errors.unable_to_delete_event'));
+    }
   };
 
   const thumbnailUrl = event.eventThumbnailAssetId
@@ -58,6 +106,69 @@
         {event.eventName}
       </h3>
     </div>
+
+    <!-- Options menu -->
+    {#if isOwner}
+      <div class="absolute top-2 right-2" on:click={(e) => e.stopPropagation()}>
+        <div class="relative">
+          <button
+            type="button"
+            class="p-1.5 rounded-full bg-black/40 hover:bg-black/60 text-white backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100"
+            on:click={(e) => {
+              e.stopPropagation();
+              showMenu = !showMenu;
+            }}
+            aria-label="Options"
+          >
+            <Icon icon={mdiDotsVertical} size="20" class="text-white" />
+          </button>
+          {#if showMenu}
+            <div
+              use:clickOutside={{ onOutclick: () => (showMenu = false) }}
+              class="absolute right-0 top-full mt-1 w-44 rounded-lg bg-white dark:bg-immich-dark-gray shadow-xl border border-gray-200 dark:border-gray-700 z-50 overflow-hidden"
+              on:click={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                class="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-left hover:bg-gray-100 dark:hover:bg-gray-800 text-immich-fg dark:text-immich-dark-fg transition-colors"
+                on:click={(e) => {
+                  e.stopPropagation();
+                  handleEdit();
+                }}
+              >
+                <Icon icon={mdiPencilOutline} size="18" />
+                <span>{$t('edit')}</span>
+              </button>
+              {#if canDelete}
+                <button
+                  type="button"
+                  class="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                  on:click={(e) => {
+                    e.stopPropagation();
+                    handleDelete();
+                  }}
+                >
+                  <Icon icon={mdiTrashCanOutline} size="18" />
+                  <span>{$t('delete')}</span>
+                </button>
+              {:else}
+                <div
+                  class="flex flex-col gap-1.5 w-full px-4 py-3 text-sm cursor-not-allowed bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-800 dark:to-gray-800/50 border-t border-gray-200 dark:border-gray-700"
+                >
+                  <div class="flex items-center gap-2.5 text-gray-500 dark:text-gray-400">
+                    <Icon icon={mdiTrashCanOutline} size="28" class="opacity-60" />
+                    <span class="font-semibold text-xs">{$t('delete_event_not_empty')}</span>
+                  </div>
+                  <!-- <p class="text-xs text-gray-500 dark:text-gray-500 ml-7">
+                    {$t('delete_event_not_empty_description')}
+                  </p> -->
+                </div>
+              {/if}
+            </div>
+          {/if}
+        </div>
+      </div>
+    {/if}
 
     <!-- Shared badge -->
     {#if isShared}

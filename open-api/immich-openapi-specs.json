@@ -14807,6 +14807,9 @@
             "format": "date-time",
             "type": "string"
           },
+          "totalAssetCount": {
+            "type": "integer"
+          },
           "updatedAt": {
             "format": "date-time",
             "type": "string"
@@ -14827,6 +14830,7 @@
           "owner",
           "ownerId",
           "shared",
+          "totalAssetCount",
           "updatedAt"
         ],
         "type": "object"
@@ -16136,7 +16140,7 @@
       "CastResponse": {
         "properties": {
           "gCastEnabled": {
-            "default": false,
+            "default": true,
             "type": "boolean"
           }
         },
@@ -22302,11 +22306,11 @@
       "TagsResponse": {
         "properties": {
           "enabled": {
-            "default": true,
+            "default": false,
             "type": "boolean"
           },
           "sidebarWeb": {
-            "default": true,
+            "default": false,
             "type": "boolean"
           }
         },

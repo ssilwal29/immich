@@ -40,7 +40,8 @@
   const serverConfig = $derived(serverConfigManager.value);
 
   const onSuccess = async (user: LoginResponseDto) => {
-    await goto(data.continueUrl, { invalidateAll: true });
+    // Redirect to events page instead of the continueUrl
+    await goto(AppRoute.EVENTS, { invalidateAll: true });
     eventManager.emit('AuthLogin', user);
   };
 

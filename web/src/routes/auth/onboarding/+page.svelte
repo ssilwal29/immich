@@ -1,7 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
-  import OnboardingBackup from '$lib/components/onboarding-page/onboarding-backup.svelte';
   import OnboardingCard from '$lib/components/onboarding-page/onboarding-card.svelte';
   import OnboardingHello from '$lib/components/onboarding-page/onboarding-hello.svelte';
   import OnboardingLocale from '$lib/components/onboarding-page/onboarding-language.svelte';
@@ -16,14 +15,7 @@
   import { OnboardingRole } from '$lib/models/onboarding-role';
   import { user } from '$lib/stores/user.store';
   import { setUserOnboarding, updateAdminOnboarding } from '@immich/sdk';
-  import {
-    mdiCellphoneArrowDownVariant,
-    mdiCloudCheckOutline,
-    mdiHarddisk,
-    mdiIncognito,
-    mdiThemeLightDark,
-    mdiTranslate,
-  } from '@mdi/js';
+  import { mdiThemeLightDark, mdiTranslate } from '@mdi/js';
   import { onMount } from 'svelte';
   import { t } from 'svelte-i18n';
 
@@ -139,7 +131,7 @@
         onboardingDto: { isOnboarded: true },
       });
 
-      await goto(AppRoute.PHOTOS);
+      await goto(AppRoute.EVENTS);
     } else {
       await goto(
         `${AppRoute.AUTH_ONBOARDING}?${QueryParameter.ONBOARDING_STEP}=${onboardingSteps[nextStepIndex].name}`,

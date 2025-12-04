@@ -196,6 +196,8 @@
   });
 
   let showFullContextMenu = $derived(allowEdit && selectedAlbum && selectedAlbum.ownerId === $user.id);
+  let hasAssets = $derived((selectedAlbum?.totalAssetCount ?? 0) > 0);
+  let canDelete = $derived(showFullContextMenu && !hasAssets);
 
   onMount(async () => {
     if (allowEdit) {
@@ -372,6 +374,10 @@
   {/if}
   <MenuOption icon={mdiDownload} text={$t('download')} onClick={() => handleSelect('download')} />
   {#if showFullContextMenu}
-    <MenuOption icon={mdiDeleteOutline} text={$t('delete')} onClick={() => handleSelect('delete')} />
+    {#if canDelete}
+      <MenuOption icon={mdiDeleteOutline} text={$t('delete')} onClick={() => handleSelect('delete')} />
+    {:else}
+      <MenuOption icon={mdiDeleteOutline} text={$t('delete_album_not_empty')} subtitle={$t('delete_album_not_empty_description')} disabled />
+    {/if}
   {/if}
 </RightClickContextMenu>
